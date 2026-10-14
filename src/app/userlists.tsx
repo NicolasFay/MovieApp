@@ -10,6 +10,10 @@ export default function UserListsScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">User Lists</ThemedText>
+
+        //adding code + components here
+
+
       </SafeAreaView>
     </ThemedView>
   );
