@@ -100,4 +100,35 @@ ON public.Listed FOR UPDATE TO authenticated USING (user_id = auth.uid()) WITH C
 CREATE POLICY "Users delete their own lists"
 ON public.Listed FOR DELETE TO authenticated USING (user_id = auth.uid());
 
--- Work on friends and group table in sprint 2
+
+-- SPRINT 2 TABLES Friends, Groups, and Members
+
+CREATE TABLE IF NOT EXISTS public.Friends(
+    f_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    requester_id UUID NOT NULL REFERENCES public.Users(user_id) ON DELETE CASCADE,
+    addressee_id UUID NOT NULL REFERENCES public.Users(user_id) ON DELETE CASCADE,
+    f_status TEXT NOT NULL DEFAULT "Pending" CHECK (STATUS IN("Pending", "Rejected", "Accepted")),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CHECK (requester_id <> addressee_id),
+    UNIQUE (requester_id, addressee_id)
+);
+
+CREATE INDEX IF NOT EXISTS friends_addressee_idx on public.Friends(addressee_id);
+
+
+CREATE TABLE IF NOT EXISTS public.Groups(
+    group_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    title TEXT NOT NULL,
+    owner_id UUID NOT NULL REFERENCES public.Users(user_id) ON DELETE CASCADE,
+    join_code TEXT UNIQUE DEFAULT substr(md5(random()::TEXT), 1, 6),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS public.Members(
+    user_id UUID REFERENCES public.Users(user_id) ON DELETE CASCADE,
+    group_id UUID REFERENCES public.Groups(group_id) ON DELETE CASCADE,
+    joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    PRIMARY KEY (user_id, group_id)
+);

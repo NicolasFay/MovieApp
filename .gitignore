@@ -44,4 +44,5 @@ example
 
 #testing SQL data
 test.sql
+
 .env
