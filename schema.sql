@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS public.Friends(
     f_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     requester_id UUID NOT NULL REFERENCES public.Users(user_id) ON DELETE CASCADE,
     addressee_id UUID NOT NULL REFERENCES public.Users(user_id) ON DELETE CASCADE,
-    f_status TEXT NOT NULL DEFAULT "Pending" CHECK (STATUS IN("Pending", "Rejected", "Accepted")),
+    f_status TEXT NOT NULL DEFAULT 'Pending' CHECK (f_Status IN ('Pending', 'Rejected', 'Accepted')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CHECK (requester_id <> addressee_id),
@@ -121,6 +121,8 @@ CREATE TABLE IF NOT EXISTS public.Groups(
     group_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title TEXT NOT NULL,
     owner_id UUID NOT NULL REFERENCES public.Users(user_id) ON DELETE CASCADE,
+
+    -- creates a random code every time a group is created.
     join_code TEXT UNIQUE DEFAULT substr(md5(random()::TEXT), 1, 6),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
