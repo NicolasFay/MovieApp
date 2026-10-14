@@ -9,6 +9,7 @@ export default function FriendsScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
+        {/* Put everything inside here */}
         <ThemedText type="title">Friends</ThemedText>
       </SafeAreaView>
     </ThemedView>
