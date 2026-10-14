@@ -20,10 +20,10 @@ export default function HomeScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <SwipeDeck
-          data={MOVIES}
+          data={MOVIES} // pulls from the base movie data rn
           renderCard={(movie) => <MovieCard movie={movie} />}
-          onSwipeLeft={handleSwipeLeft}
-          onSwipeRight={handleSwipeRight}
+          onSwipeLeft={handleSwipeLeft} // hooks up the swipe left action to the handleSwipeLeft function
+          onSwipeRight={handleSwipeRight} // hooks up the swipe right action to the handleSwipeRight function
         />
       </SafeAreaView>
     </ThemedView>
