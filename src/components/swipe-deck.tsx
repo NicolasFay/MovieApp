@@ -45,6 +45,8 @@ export function SwipeDeck<T extends { id: string }>({
   const next = data[index + 1]; // next is the next card in the data array
 
   const handleSwiped = (direction: Direction) => {
+    // SwipeableCard receives as a prop a function to call when the card is swiped. 
+    // It calls this function with the direction of the swipe
     // flip through array and check for end of array and call onEmpty if so
     if (direction === 'left') onSwipeLeft?.(current);
     else onSwipeRight?.(current);
@@ -55,6 +57,9 @@ export function SwipeDeck<T extends { id: string }>({
   };
 
   if (!current) {
+    // each render, checks if current is undefined (which happens
+    // after the last card is swiped and onEmpty is called) and if so, 
+    // renders a message saying there are no more cards.
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyText}>No more movies</Text>
@@ -64,9 +69,13 @@ export function SwipeDeck<T extends { id: string }>({
 
   return (
     <View style={styles.deck}>
+      { /* Render the next card if it exists, which will be smaller and faded
+           underneath the swipeable card */ }
       {next && <View style={styles.nextCard}>{renderCard(next)}</View>}
 
       {/* key forces a fresh card (with reset animation values) for each movie */}
+      {/* The front card is wrapped in a SwipeableCard component that handles the 
+      swipe gestures and animations */}
       <SwipeableCard key={current.id} onSwiped={handleSwiped}>
         {renderCard(current)}
       </SwipeableCard>
@@ -126,23 +135,10 @@ function SwipeableCard({
     ],
   }));
 
-  const likeStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(translateX.value, [0, threshold], [0, 1], Extrapolation.CLAMP),
-  }));
-  const nopeStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(translateX.value, [-threshold, 0], [1, 0], Extrapolation.CLAMP),
-  }));
-
   return (
     <GestureDetector gesture={pan}>
       <Animated.View style={[styles.card, cardStyle]}>
         {children}
-        <Animated.View style={[styles.badge, styles.likeBadge, likeStyle]}>
-          <Text style={[styles.badgeText, { color: '#2f9e44' }]}>LIKE</Text>
-        </Animated.View>
-        <Animated.View style={[styles.badge, styles.nopeBadge, nopeStyle]}>
-          <Text style={[styles.badgeText, { color: '#e03131' }]}>NOPE</Text>
-        </Animated.View>
       </Animated.View>
     </GestureDetector>
   );
