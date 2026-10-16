@@ -11,8 +11,7 @@ export default function UserListsScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">User Lists</ThemedText>
 
-        //adding code + components here
-
+        { /* adding code + components here */ }
 
       </SafeAreaView>
     </ThemedView>
