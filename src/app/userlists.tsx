@@ -1,9 +1,13 @@
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ListOptions } from '@/components/list-options';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
+
+
+import '@/components/list-options';
 
 export default function UserListsScreen() {
   return (
@@ -11,7 +15,7 @@ export default function UserListsScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">User Lists</ThemedText>
 
-        { /* adding code + components here */ }
+        <ListOptions/>
 
       </SafeAreaView>
     </ThemedView>
