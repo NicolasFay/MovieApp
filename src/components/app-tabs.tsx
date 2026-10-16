@@ -1,33 +1,45 @@
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
-
-import { Colors } from '@/constants/theme';
+import { Colors } from '../constants/theme';
 
 export default function AppTabs() {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
 
   return (
-    <NativeTabs
-      backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ selected: { color: colors.text } }}>
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require('@/assets/images/tabIcons/home.png')}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="userlists">
-        <NativeTabs.Trigger.Label>userlists</NativeTabs.Trigger.Label>
-        { /* icon */}
-      </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="friends">
-        <NativeTabs.Trigger.Label>Friends</NativeTabs.Trigger.Label>
-         { /* icon */}
-      </NativeTabs.Trigger>
-    </NativeTabs>
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: colors.base_purple,
+          borderTopWidth: 0,
+        },
+        tabBarActiveTintColor: colors.active_purple,
+        tabBarInactiveTintColor: colors.backgroundElement,
+        tabBarLabelStyle: { fontWeight: '600' },
+      }}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="userlists"
+        options={{
+          title: 'Lists',
+          tabBarIcon: ({ color, size }) => <Ionicons name="list" color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="friends"
+        options={{
+          title: 'Friends',
+          tabBarIcon: ({ color, size }) => <Ionicons name="people" color={color} size={size} />,
+        }}
+      />
+    </Tabs>
   );
 }

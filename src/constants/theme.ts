@@ -14,6 +14,10 @@ export const Colors = {
     backgroundElement: '#F0F0F3',
     backgroundSelected: '#E0E1E6',
     textSecondary: '#60646C',
+    base_purple : '#dfcdfa', // light purple
+    active_purple: '#6D28D9', // deeper purple for the selected tab
+    inactive_purple: '#8B7BA8', // muted purple for the others
+
   },
   dark: {
     text: '#ffffff',
@@ -21,7 +25,10 @@ export const Colors = {
     backgroundElement: '#212225',
     backgroundSelected: '#2E3135',
     textSecondary: '#B0B4BA',
-  },
+    base_purple : '#ba8bff', // light purple
+    active_purple: '#6D28D9', // deeper purple for the selected tab
+    inactive_purple: '#8B7BA8', // muted purple for the others
+  }
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
