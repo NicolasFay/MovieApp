@@ -134,3 +134,32 @@ CREATE TABLE IF NOT EXISTS public.Members(
 
     PRIMARY KEY (user_id, group_id)
 );
+
+-- helper function that checks what users, users can see
+CREATE OR REPLACE FUNCTION public.is_group_member(g uuid)
+RETURNS BOOLEAN
+LANGUAGE SQL
+stable
+SECURITY definer
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.members
+    WHERE group_id = g AND user_id = auth.uid()
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_friend(other uuid)
+RETURNS BOOLEAN
+LANGUAGE SQL
+stable
+SECURITY definer
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.friends
+    WHERE STATUS = 'accepted'
+      AND ((requester_id = auth.uid() and addressee_id = other)
+        OR (addressee_id = auth.uid() and requester_id = other))
+  );
+$$;
