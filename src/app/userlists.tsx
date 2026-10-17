@@ -1,22 +1,25 @@
-import { StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ListOptions } from '@/components/list-options';
+import { ListOptions, ListType } from '@/components/list-options';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
 
-
-import '@/components/list-options';
-
 export default function UserListsScreen() {
+  const [selected, setSelected] = useState<ListType>('liked');
+
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedText type="title">User Lists</ThemedText>
 
-        <ListOptions/>
+        <ListOptions selected={selected} onSelect={setSelected} />
 
+        <View style={styles.content}>
+          <ThemedText>This will be the {selected} list</ThemedText>
+        </View>
       </SafeAreaView>
     </ThemedView>
   );
@@ -29,4 +32,5 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
     paddingBottom: BottomTabInset + Spacing.three,
   },
+  content: { flex: 1, paddingTop: 16 },
 });
