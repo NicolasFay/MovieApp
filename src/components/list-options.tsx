@@ -16,6 +16,5 @@ export function ListOptions(){
             {tapped && <ThemedText>Nick is a Bigger Butt Face</ThemedText>}
 
         </>
-
     );
 }
