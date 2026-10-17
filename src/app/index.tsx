@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MovieCard } from '@/components/movie-card';
 import { SwipeDeck } from '@/components/swipe-deck';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { MOVIES, type Movie } from '@/data/movies';
 
 export default function HomeScreen() {
@@ -35,6 +35,6 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     padding: Spacing.four,
-    paddingBottom: BottomTabInset + Spacing.three,
+    paddingBottom: Spacing.three,
   },
 });
