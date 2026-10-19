@@ -6,6 +6,7 @@ import { SwipeDeck } from '@/components/swipe-deck';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
 import { MOVIES, type Movie } from '@/data/movies';
+import { useEffect } from 'react';
 
 export default function HomeScreen() {
   const handleSwipeLeft = (movie: Movie) => {
@@ -14,8 +15,22 @@ export default function HomeScreen() {
 
   const handleSwipeRight = (movie: Movie) => {
     // TODO: Handle swipe action (e.g., update state, make API call, etc.)
+    // format data to upload to database, give it the 'listed' property for status
   }
 
+  const handleSwipeUp = (movie: Movie) => {
+    // TODO: Handle swipe action (e.g., update state, make API call, etc.)
+  }
+
+  const handleSwipeDown = (movie: Movie) => {
+    // TODO: Handle swipe action (e.g., update state, make API call, etc.)
+  }
+
+  useEffect(() => {
+    // This effect runs once on the first render of this page
+    // populateCache();
+  }, []);
+  
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -24,6 +39,8 @@ export default function HomeScreen() {
           renderCard={(movie) => <MovieCard movie={movie} />}
           onSwipeLeft={handleSwipeLeft} // hooks up the swipe left action to the handleSwipeLeft function
           onSwipeRight={handleSwipeRight} // hooks up the swipe right action to the handleSwipeRight function
+          onSwipeUp={handleSwipeUp} // hooks up the swipe up action to the handleSwipeUp function
+          onSwipeDown={handleSwipeDown} // hooks up the swipe down action to the handleSwipeDown function
         />
       </SafeAreaView>
     </ThemedView>
