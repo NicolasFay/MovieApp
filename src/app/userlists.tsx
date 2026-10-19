@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { ListOptions, ListType } from '@/components/list-options';
+import { MovieList } from '@/components/movieList';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
+import { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function UserListsScreen() {
   const [selected, setSelected] = useState<ListType>('liked');
@@ -18,7 +18,7 @@ export default function UserListsScreen() {
         <ListOptions selected={selected} onSelect={setSelected} />
 
         <View style={styles.content}>
-          <ThemedText>This will be the {selected} list</ThemedText>
+          <MovieList status={selected} />
         </View>
       </SafeAreaView>
     </ThemedView>
