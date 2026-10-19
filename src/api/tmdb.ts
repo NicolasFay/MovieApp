@@ -48,4 +48,4 @@ export function formatMovies(movies: any[]) {
 }
 
 // getMovies(2);
-getGenres();
+// getGenres();
