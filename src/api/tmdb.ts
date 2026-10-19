@@ -1,6 +1,16 @@
 const TOKEN = process.env.EXPO_PUBLIC_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
 
+export type Movie = {
+  id: string;
+  title: string;
+  overview: string;
+  release_date: string;
+  genres: string[];
+  poster_path: string;
+  vote_average: number;
+};
+
 export async function getMovies(page: number) {
     // fetches popular movies from tmdb
     try {
@@ -35,15 +45,16 @@ export function formatGenres(genreIds: number[], genres: any[]) {
     });
 }
 
-export function formatMovies(movies: any[]) {
-    // formats fetched movies for Supabase table
+export function formatMovies(movies: any[], genres: any[]): Movie[] {
+    // formats fetched movies into the movie datatype
     return movies.map((movie) => ({
-        movie_id: movie.id,
+        id: String(movie.id),
         title: movie.title,
-        movie_desc: movie.overview,
+        overview: movie.overview,
         release_date: movie.release_date,
-        genres: movie.genre_ids,
-        poster_path: movie.poster_path
+        genres: formatGenres(movie.genre_ids, genres), 
+        poster_path: movie.poster_path,
+        vote_average: movie.vote_average
     }));
 }
 
