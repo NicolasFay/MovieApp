@@ -56,3 +56,8 @@ export async function refillBackupQueue() {
         isFetching = false;
     }
 }
+
+export function getActiveQueue(): Movie[] {
+    // return a copy of the active queue
+    return [...activeQueue];
+}

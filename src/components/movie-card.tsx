@@ -1,19 +1,22 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, ImageBackground } from 'react-native';
 
 import { Spacing } from '@/constants/theme';
-import type { Movie } from '@/data/movies';
+import type { Movie } from '@/api/tmdb';
 
 export function MovieCard({ movie }: { movie: Movie }) {
   return (
-    <View style={[styles.card, { backgroundColor: movie.color }]}>
+    <ImageBackground
+      source={{ uri: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : undefined }}
+      style={[styles.card]}
+    >
       <View style={styles.info}>
         <Text style={styles.title}>{movie.title}</Text>
         <Text style={styles.meta}>
-          {movie.year} · {movie.genre}
+          {movie.release_date} · {movie.genres.join(', ')}
         </Text>
-        <Text style={styles.description}>{movie.description}</Text>
+        <Text style={styles.description}>{movie.overview}</Text>
       </View>
-    </View>
+    </ImageBackground>
   );
 }
 

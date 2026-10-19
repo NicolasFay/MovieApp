@@ -1,14 +1,30 @@
 import { StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { getActiveQueue, populateCache } from '@/api/cache';
+import { type Movie } from '@/api/tmdb';
 import { MovieCard } from '@/components/movie-card';
 import { SwipeDeck } from '@/components/swipe-deck';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
-import { MOVIES, type Movie } from '@/data/movies';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function HomeScreen() {
+  const [movies, setMovies] = useState<Movie[]>([]);
+
+  useEffect(() => {
+    async function loadMovies() {
+      try {
+        await populateCache();
+        setMovies(getActiveQueue());
+      } catch (error) {
+        console.error('Error loading movies:', error);
+      }
+    }
+
+    loadMovies();
+  }, []);
+
   const handleSwipeLeft = (movie: Movie) => {
     // TODO: Handle swipe action (e.g., update state, make API call, etc.)
   }
@@ -35,7 +51,7 @@ export default function HomeScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <SwipeDeck
-          data={MOVIES} // pulls from the base movie data rn
+          data={movies} // pulls from the base movie data rn
           renderCard={(movie) => <MovieCard movie={movie} />}
           onSwipeLeft={handleSwipeLeft} // hooks up the swipe left action to the handleSwipeLeft function
           onSwipeRight={handleSwipeRight} // hooks up the swipe right action to the handleSwipeRight function
