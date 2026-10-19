@@ -2,18 +2,18 @@ import { ReactNode, useState } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-    Extrapolation,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-    withTiming,
+  Extrapolation,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
 import { Spacing } from '@/constants/theme';
 
-type Direction = 'left' | 'right';
+type Direction = 'left' | 'right' | 'up' | 'down';
 
 { /*T extends { id: string } means that T is a placeholder for 
     whatever item you give it and the { id: string } means that 
@@ -26,6 +26,8 @@ type SwipeDeckProps<T extends { id: string }> = {
   renderCard: (item: T) => ReactNode;
   onSwipeLeft?: (item: T) => void; // optional callback for when a card is swiped left
   onSwipeRight?: (item: T) => void; // optional callback for when a card is swiped right
+  onSwipeUp?: (item: T) => void; // optional callback for when a card is swiped up
+  onSwipeDown?: (item: T) => void; // optional callback for when a card is swiped down
   onEmpty?: () => void; // optional callback for when the deck is empty
   // the ? means that to call it you must do onEmpty?.() so that if it is 
   // undefined it will not throw an error.
@@ -36,6 +38,8 @@ export function SwipeDeck<T extends { id: string }>({
   renderCard,
   onSwipeLeft,
   onSwipeRight,
+  onSwipeUp,
+  onSwipeDown,
   onEmpty,
 }: SwipeDeckProps<T>) {
   // index is the index of the current card in the data array
@@ -48,9 +52,21 @@ export function SwipeDeck<T extends { id: string }>({
     // SwipeableCard receives as a prop a function to call when the card is swiped. 
     // It calls this function with the direction of the swipe
     // flip through array and check for end of array and call onEmpty if so
-    if (direction === 'left') onSwipeLeft?.(current);
-    else onSwipeRight?.(current);
-
+    switch (direction) {
+      case 'left':
+        onSwipeLeft?.(current);
+        break;
+      case 'right':
+        onSwipeRight?.(current);
+        break;
+      case 'up':
+        onSwipeUp?.(current);
+        break;
+      case 'down':
+        onSwipeDown?.(current);
+        break;
+    }
+    // update the index to the next card and if it is the last card, call onEmpty
     const newIndex = index + 1;
     setIndex(newIndex);
     if (newIndex >= data.length) onEmpty?.();
@@ -90,8 +106,9 @@ function SwipeableCard({
   children: ReactNode;
   onSwiped: (direction: Direction) => void;
 }) {
-  const { width } = useWindowDimensions();
-  const threshold = width * 0.3;
+  const { width, height } = useWindowDimensions();
+  const thresholdX = width * 0.3;
+  const thresholdY = height * 0.2; // vertical swipes need less distance, screens are taller than they are wide
 
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -102,18 +119,37 @@ function SwipeableCard({
       translateY.value = e.translationY;
     })
     .onEnd((e) => {
-      const farEnough = Math.abs(e.translationX) > threshold;
-      const fastFlick = Math.abs(e.velocityX) > 800 && Math.abs(e.translationX) > 40;
+      const absX = Math.abs(e.translationX);
+      const absY = Math.abs(e.translationY);
+
+      const horizontal = absX > absY; // determine if the swipe is more horizontal or vertical
+
+      const farEnough = horizontal ? absX > thresholdX : absY > thresholdY;
+      const fastFlick = horizontal ? Math.abs(e.velocityX) > 800 && absX > 40 : Math.abs(e.velocityY) > 800 && absY > 40;
 
       if (farEnough || fastFlick) {
-        const direction: Direction = e.translationX > 0 ? 'right' : 'left';
-        translateX.value = withTiming(
-          (direction === 'right' ? 1 : -1) * width * 1.5,
-          { duration: 250 },
-          (finished) => {
-            if (finished) scheduleOnRN(onSwiped, direction);
-          }
-        );
+        const direction: Direction = horizontal
+          ? e.translationX > 0 ? 'right' : 'left'
+          : e.translationY > 0 ? 'down' : 'up';
+
+        const onDone = (finished?: boolean) => {
+          'worklet';
+          if (finished) scheduleOnRN(onSwiped, direction);
+        };
+
+        if (horizontal) {
+          translateX.value = withTiming(
+            (direction === 'right' ? 1 : -1) * width * 1.5,
+            { duration: 250 },
+            onDone
+          );
+          } else {
+          translateY.value = withTiming(
+            (direction === 'down' ? 1 : -1) * height * 1.5,
+            { duration: 250 },
+            onDone
+          );
+        }
       } else {
         translateX.value = withSpring(0);
         translateY.value = withSpring(0);
@@ -162,8 +198,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
     backgroundColor: 'rgba(255,255,255,0.85)',
-  },
-  likeBadge: { left: Spacing.four, transform: [{ rotate: '-12deg' }], borderColor: '#2f9e44' },
-  nopeBadge: { right: Spacing.four, transform: [{ rotate: '12deg' }], borderColor: '#e03131' },
-  badgeText: { fontSize: 24, fontWeight: '800' },
+  }
 });

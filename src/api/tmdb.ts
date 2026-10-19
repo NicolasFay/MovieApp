@@ -59,4 +59,4 @@ export function formatMovies(movies: any[], genres: any[]): Movie[] {
 }
 
 // getMovies(2);
-getGenres();
+// getGenres();
