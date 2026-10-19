@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS public.Movies(
     title TEXT NOT NULL,
     movie_desc TEXT,
     RELEASE_DATE DATE,
-    trailer_url TEXT,
+    rating NUMERIC(3,1) CHECK (rating >= 0 AND rating <= 10),
     genre INT[] NOT NULL DEFAULT '{}',
     poster_path TEXT,
     cached_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
