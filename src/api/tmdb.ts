@@ -9,6 +9,7 @@ export type Movie = {
   genres: string[];
   poster_path: string;
   vote_average: number;
+  genre_ids: number[]; // optional property for genre ids, used when fetching from tmdb
 };
 
 export async function getMovies(page: number) {
@@ -58,7 +59,8 @@ export function formatMovies(movies: any[], genres: any[]): Movie[] {
         release_date: movie.release_date,
         genres: formatGenres(movie.genre_ids, genres), 
         poster_path: movie.poster_path,
-        vote_average: movie.vote_average
+        vote_average: movie.vote_average,
+        genre_ids: movie.genre_ids,
     }));
 }
 
