@@ -15,6 +15,10 @@ export async function getMovies(page: number) {
     // fetches popular movies from tmdb
     try {
         const response = await fetch(`${BASE_URL}/movie/popular?api_key=${TOKEN}&page=${page}`);
+        if (!response.ok) {
+            // if api call fails or hits a rate limit, throw an error to be caught by the caller
+            throw new Error(`Failed to fetch movies: ${response.statusText}`);
+        }
         const data = await response.json();
         // console.log(data);
         return data.results;
