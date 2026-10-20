@@ -16,7 +16,7 @@ export async function getMovies(page: number) {
     try {
         const response = await fetch(`${BASE_URL}/movie/popular?api_key=${TOKEN}&page=${page}`);
         const data = await response.json();
-        console.log(data);
+        // console.log(data);
         return data.results;
     } catch (error) {
         console.error('Error fetching movies:', error);
@@ -32,7 +32,7 @@ export async function getGenres() {
         throw new Error(`Failed to fetch genres: ${response.statusText}`);
     }
     const data = await response.json();
-    console.log(data);
+    // console.log(data);
     return data.genres;
 }
 
