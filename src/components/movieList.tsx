@@ -58,6 +58,7 @@ export function MovieList({ status }: Props) {
           <View style={styles.info}>
             <ThemedText type="smallBold">{item.title}</ThemedText>
             {item.rating != null && <ThemedText>{item.rating}</ThemedText>}
+            {item.genre != null && <ThemedText>{item.genre}</ThemedText>}
           </View>
         </View>
       )}
