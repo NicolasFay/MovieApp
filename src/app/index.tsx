@@ -14,6 +14,8 @@ import { MovieCard } from '@/components/movie-card';
 import { SwipeDeck } from '@/components/swipe-deck';
 import { ThemedView } from '@/components/themed-view';
 import { Spacing } from '@/constants/theme';
+import { saveSwipe } from '@/db/dbFunctions';
+import { toDbMovie } from '@/db/dbHelpers';
 
 // returns the deck's movies plus anything in the cache's active queue it doesn't have yet
 function withNewMovies(current: Movie[]): Movie[] {
@@ -65,29 +67,31 @@ export default function HomeScreen() {
 
   const handleSwipeLeft = (movie: Movie) => {
     advanceDeck();
-    // TODO: Handle swipe action (e.g., update state, make API call, etc.)
+    saveSwipe(toDbMovie(movie), 'disliked').catch((e) =>
+      console.error('Failed to save swipe:', e)
+    );
   }
 
   const handleSwipeRight = (movie: Movie) => {
     advanceDeck();
-    // TODO: Handle swipe action (e.g., update state, make API call, etc.)
-    // format data to upload to database, give it the 'listed' property for status
+    saveSwipe(toDbMovie(movie), 'liked').catch((e) =>
+      console.error('Failed to save swipe:', e)
+    );
   }
 
   const handleSwipeUp = (movie: Movie) => {
     advanceDeck();
-    // TODO: Handle swipe action (e.g., update state, make API call, etc.)
+    saveSwipe(toDbMovie(movie), 'rejected').catch((e) =>
+      console.error('Failed to save swipe:', e)
+    );
   }
 
   const handleSwipeDown = (movie: Movie) => {
     advanceDeck();
-    // TODO: Handle swipe action (e.g., update state, make API call, etc.)
+    saveSwipe(toDbMovie(movie), 'watchlist').catch((e) =>
+      console.error('Failed to save swipe:', e)
+    );
   }
-
-  useEffect(() => {
-    // This effect runs once on the first render of this page
-    // populateCache();
-  }, []);
 
   return (
     <ThemedView style={styles.container}>
