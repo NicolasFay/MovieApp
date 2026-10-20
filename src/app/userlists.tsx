@@ -1,14 +1,24 @@
+import { supabase } from '@/api/supabase';
 import { ListOptions, ListType } from '@/components/list-options';
 import { MovieList } from '@/components/movieList';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, Spacing } from '@/constants/theme';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+
 export default function UserListsScreen() {
   const [selected, setSelected] = useState<ListType>('liked');
+
+  //signs in with test account automatically
+  //DELETE ONCE USER CREATION IS DONE.
+  useEffect(() => {
+    supabase.auth
+      .signInWithPassword({ email: 'tjsheeha@uvm.edu', password: 'cwrynn' })
+      .then(({ error }) => console.log(error ?? 'signed in'));
+  }, []);
 
   return (
     <ThemedView style={styles.container}>
