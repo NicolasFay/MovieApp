@@ -15,8 +15,9 @@ export function MovieList({ status }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // runs on first load and each time the user switches lists
   useEffect(() => {
-    let cancelled = false; // ignore results from a tab the user already left
+    let cancelled = false;
     setLoading(true);
     setError(null);
 
@@ -31,16 +32,19 @@ export function MovieList({ status }: Props) {
         if (!cancelled) setLoading(false);
       });
 
+    // ignores results from a tab the user already left
     return () => {
       cancelled = true;
     };
   }, [status]);
 
+  //checks and returns if app is loading, has an error, or is empty.
   if (loading) return <ActivityIndicator style={styles.center} />;
   if (error) return <ThemedText>Couldn't load this list: {error}</ThemedText>;
   if (movies.length === 0) return <ThemedText>Nothing here yet. Go swipe some movies!</ThemedText>;
 
   return (
+    //draws one row per movie
     <FlatList
       data={movies}
       keyExtractor={(movie) => String(movie.movie_id)}
@@ -53,7 +57,7 @@ export function MovieList({ status }: Props) {
           )}
           <View style={styles.info}>
             <ThemedText type="smallBold">{item.title}</ThemedText>
-            {item.rating != null && <ThemedText>★ {item.rating}</ThemedText>}
+            {item.rating != null && <ThemedText>{item.rating}</ThemedText>}
           </View>
         </View>
       )}

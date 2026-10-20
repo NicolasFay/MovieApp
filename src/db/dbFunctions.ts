@@ -26,7 +26,7 @@ async function getUserId(): Promise<string> {
   return data.user.id;
 }
 
-// ADD / UPDATE function
+// Add / Update function
 // 1) make sure the movie exists in Movies (the foreign key requires it)
 // 2) save or change this user's status for it
 // upsert = insert if new, update if the row already exists, so swiping on a
@@ -48,7 +48,7 @@ export async function saveSwipe(movie: Movie, status: Status) {
   if (error) throw error;
 }
 
-// READ: all movies on one of the user's lists, newest first.
+// Reads all movies on one of the user's lists, newest first.
 export async function getList(status: ListType): Promise<Movie[]> {
   const userId = await getUserId();
 
@@ -64,7 +64,7 @@ export async function getList(status: ListType): Promise<Movie[]> {
   return (data ?? []).map((row: any) => row.movies as Movie);
 }
 
-// READ: ids of every movie the user already swiped on (any status, including
+// Reads ids of every movie the user already swiped on (any status, including
 // rejected), so the swipe deck can skip them.
 export async function getSwipedMovieIds(): Promise<number[]> {
   const userId = await getUserId();
@@ -78,7 +78,7 @@ export async function getSwipedMovieIds(): Promise<number[]> {
   return (data ?? []).map((row) => row.movie_id as number);
 }
 
-// UPDATE: move a movie to a different list.
+// Updates a movie to a different list.
 export async function changeStatus(movieId: number, status: Status) {
   const userId = await getUserId();
 
@@ -90,7 +90,7 @@ export async function changeStatus(movieId: number, status: Status) {
   if (error) throw error;
 }
 
-// REMOVE: take a movie off the user's lists entirely.
+// Removes a movie off the user's lists entirely.
 export async function removeFromLists(movieId: number) {
   const userId = await getUserId();
 
