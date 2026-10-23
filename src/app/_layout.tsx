@@ -8,6 +8,9 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 SplashScreen.preventAutoHideAsync();
 
+const SUPABASE_EMAIL = 'tjsheeha@uvm.edu'
+const SUPABASE_PASS = 'cwrynn'
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
 
@@ -15,7 +18,7 @@ export default function TabLayout() {
   //DELETE ONCE USER CREATION IS DONE.
   useEffect(() => {
     supabase.auth
-      .signInWithPassword({ email: 'tjsheeha@uvm.edu', password: 'cwrynn' })
+      .signInWithPassword({ email: SUPABASE_EMAIL, password: SUPABASE_PASS })
       .then(({ error }) => console.log(error ?? 'signed in'));
   }, []);
   
