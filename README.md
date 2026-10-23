@@ -1,56 +1,31 @@
-# Welcome to your Expo app 👋
+# MovieApp
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Run the app on a new machine
 
-## Get started
-
-1. Install dependencies
+1. Install [Node.js](https://nodejs.org/) (with npm) and Git. To run on a phone, install **Expo Go** on the device.
+2. Clone the repository and open a terminal in the project folder.
+3. Install the project dependencies listed in `package-lock.json`:
 
    ```bash
-   npm install
+   npm ci
    ```
 
-2. Start the app
+4. Create a `.env` file in the project root and add the required API credentials:
+
+   ```dotenv
+   EXPO_PUBLIC_API_KEY=your_tmdb_api_key
+   EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+   EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   ```
+
+   Get the movie API key from [The Movie Database](https://www.themoviedb.org/documentation/api) and the URL and anon key from your [Supabase project](https://supabase.com/dashboard). These `EXPO_PUBLIC_` values are included in the client app, so use only public/anon credentials—never a Supabase service-role key. Configure Supabase authentication and run [`src/db/schema.sql`](./src/db/schema.sql) in the Supabase SQL Editor.
+
+5. Start the Expo development server:
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+   Scan the QR code with Expo Go, or use the terminal shortcuts to open a simulator or web version. Keep the phone and computer on the same network. If you change `.env`, stop and restart the server so Expo reloads the values.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+`npm ci` installs the dependencies declared by this project, including Expo, React Native, Expo Router, and Supabase. You do not need to install them individually.
