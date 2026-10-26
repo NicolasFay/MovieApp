@@ -67,7 +67,7 @@ ALTER TABLE public.Listed ENABLE ROW LEVEL SECURITY;
 --only can create or change own row
 
 CREATE POLICY "Profiles are readable by signed-in Users"
-    ON public.Users FOR SELECT TO authenticated USING (true);
+ON public.Users FOR SELECT TO authenticated USING (true);
 
 CREATE POLICY "Users insert their own profile"
 ON public.Users FOR INSERT TO authenticated WITH 
@@ -91,8 +91,8 @@ CREATE POLICY "Users read their own list"
 ON public.Listed FOR SELECT TO authenticated USING (user_id = auth.uid());
 
 CREATE POLICY "users add to their own lists"
-  on public.Listed for INSERT TO authenticated
-  WITH CHECK (user_id = auth.uid());
+ON public.Listed FOR INSERT TO authenticated
+WITH CHECK (user_id = auth.uid());
 
 CREATE POLICY "Users change their own lists"
 ON public.Listed FOR UPDATE TO authenticated USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
@@ -158,8 +158,80 @@ SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.friends
-    WHERE STATUS = 'accepted'
-      AND ((requester_id = auth.uid() and addressee_id = other)
-        OR (addressee_id = auth.uid() and requester_id = other))
+    WHERE f_status = 'Accepted'
+      AND ((requester_id = auth.uid() AND addressee_id = other)
+        OR (addressee_id = auth.uid() AND requester_id = other))
   );
 $$;
+
+-- Row level security for friends, groups, and members
+ALTER TABLE public.friends ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.groups  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.members ENABLE ROW LEVEL SECURITY;
+
+-- friends
+CREATE POLICY "user sees their own friends rows"
+ON public.friends FOR SELECT TO authenticated
+USING (requester_id = auth.uid() OR addressee_id = auth.uid());
+
+CREATE POLICY "users send friend requests"
+ON public.friends FOR INSERT TO authenticated
+WITH CHECK (requester_id = auth.uid() AND f_status = 'Pending');
+
+CREATE POLICY "addressee responds to requests"
+ON public.friends FOR UPDATE TO authenticated
+USING (addressee_id = auth.uid())
+WITH CHECK (addressee_id = auth.uid());
+
+CREATE POLICY "either side can remove a friendship"
+ON public.friends FOR DELETE TO authenticated
+USING (requester_id = auth.uid() OR addressee_id = auth.uid());
+
+CREATE POLICY "friends can read each other's lists"
+ON public.listed FOR SELECT TO authenticated
+USING (public.is_friend(user_id));
+
+-- groups
+CREATE POLICY "members and owner can see a group"
+ON public.groups FOR SELECT TO authenticated
+USING (owner_id = auth.uid() OR public.is_group_member(group_id));
+
+CREATE POLICY "users create groups they own"
+ON public.groups FOR INSERT TO authenticated
+WITH CHECK (owner_id = auth.uid());
+
+CREATE POLICY "owner updates the group"
+ON public.groups FOR UPDATE TO authenticated
+USING (owner_id = auth.uid())
+WITH CHECK (owner_id = auth.uid());
+
+CREATE POLICY "owner deletes the group"
+ON public.groups FOR DELETE TO authenticated
+USING (owner_id = auth.uid());
+
+-- members
+CREATE POLICY "members can see who is in their group"
+ON public.members FOR SELECT TO authenticated
+USING (public.is_group_member(group_id)
+  OR EXISTS (SELECT 1 FROM public.groups g
+             WHERE g.group_id = members.group_id AND g.owner_id = auth.uid()));
+
+CREATE POLICY "owner adds members"
+ON public.members FOR INSERT TO authenticated
+WITH CHECK (EXISTS (SELECT 1 FROM public.groups g
+                    WHERE g.group_id = members.group_id AND g.owner_id = auth.uid()));
+
+CREATE POLICY "owner removes members or users leave"
+ON public.members FOR DELETE TO authenticated
+USING (user_id = auth.uid()
+  OR EXISTS (SELECT 1 FROM public.groups g
+             WHERE g.group_id = members.group_id AND g.owner_id = auth.uid()));
+
+CREATE POLICY "group members can read each other's lists"
+ON public.listed FOR SELECT TO authenticated
+USING (EXISTS (
+  SELECT 1
+  FROM public.members m1
+  JOIN public.members m2 ON m1.group_id = m2.group_id
+  WHERE m1.user_id = auth.uid() AND m2.user_id = listed.user_id
+));
