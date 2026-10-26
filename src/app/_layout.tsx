@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import { supabase } from '@/api/supabase';
+import { supabase } from '@/db/dbFunctions';
 import AppTabs from '@/components/app-tabs';
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
