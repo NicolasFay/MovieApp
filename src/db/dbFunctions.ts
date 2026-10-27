@@ -128,3 +128,26 @@ export async function removeFromLists(movieId: number) {
     .eq('movie_id', movieId);
   if (error) throw error;
 }
+
+export type UserProfile = {
+  user_id: string;
+  username: string | null;
+  avatar_url: string | null;
+};
+
+// Search users by username (case-insensitive, partial match), excluding yourself
+export async function searchUsers(query: string): Promise<UserProfile[]> {
+  const q = query.trim();
+  if (!q) return [];
+  const myId = await getUserId();
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('user_id, username, avatar_url')
+    .ilike('username', `%${q}%`)
+    .neq('user_id', myId)
+    .limit(20);
+  if (error) throw error;
+
+  return data ?? [];
+}
