@@ -5,7 +5,6 @@ const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-
 export async function insertMovies(movies: any[]) {
   // adds an array of movies formatted from the TMDB api
   // to the Supabase Movies table and avoids duplicates
