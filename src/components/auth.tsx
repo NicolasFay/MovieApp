@@ -1,34 +1,34 @@
-import { useState } from 'react'
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import { supabase } from '../api/supabase'
-import { appStyles } from '../style/theme'
+import { supabase } from '@/api/supabase';
+import { useAppStyles } from '@/style/theme';
+import { useState } from 'react';
+import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function Auth() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const styles = appStyles
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { styles, colors } = useAppStyles();
 
   async function signInWithEmail() {
-    setLoading(true)
+    setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
-    })
+    });
 
-    if (error) Alert.alert(error.message)
-    setLoading(false)
+    if (error) Alert.alert(error.message);
+    setLoading(false);
   }
 
   async function signUpWithEmail() {
-    setLoading(true)
+    setLoading(true);
     const { error } = await supabase.auth.signUp({
       email: email,
       password: password,
-    })
+    });
 
-    if (error) Alert.alert(error.message)
-    setLoading(false)
+    if (error) Alert.alert(error.message);
+    setLoading(false);
   }
 
   return (
@@ -39,6 +39,7 @@ export default function Auth() {
           onChangeText={(text) => setEmail(text)}
           value={email}
           placeholder="email@address.com"
+          placeholderTextColor={colors.placeholder}
           autoCapitalize="none"
           style={styles.input}
         />
@@ -50,6 +51,7 @@ export default function Auth() {
           value={password}
           secureTextEntry={true}
           placeholder="Password"
+          placeholderTextColor={colors.placeholder}
           autoCapitalize="none"
           style={styles.input}
         />
@@ -73,5 +75,5 @@ export default function Auth() {
         </TouchableOpacity>
       </View>
     </View>
-  )
+  );
 }
