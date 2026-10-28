@@ -1,12 +1,12 @@
 import { supabase } from '@/api/supabase';
-import { appStyles } from '@/style/theme';
+import { useAppStyles } from '@/style/theme';
 import { useEffect, useState } from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 export default function Account({ userId, email }: { userId: string; email?: string }) {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
-  const styles = appStyles;
+  const { styles } = useAppStyles();
 
   useEffect(() => {
     if (userId) getProfile();
