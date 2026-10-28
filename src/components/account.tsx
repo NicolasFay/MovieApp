@@ -1,84 +1,66 @@
+import { supabase } from '@/api/supabase';
 import { appStyles } from '@/style/theme';
 import { useEffect, useState } from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { supabase } from '../api/supabase';
 
 export default function Account({ userId, email }: { userId: string; email?: string }) {
-  const [loading, setLoading] = useState(true)
-  const [username, setUsername] = useState('')
-  const [website, setWebsite] = useState('')
-  const [avatarUrl, setAvatarUrl] = useState('')
-  const styles = appStyles
+  const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState('');
+  const styles = appStyles;
 
   useEffect(() => {
-    if (userId) getProfile()
-  }, [userId])
+    if (userId) getProfile();
+  }, [userId]);
 
   async function getProfile() {
     try {
-      setLoading(true)
+      setLoading(true);
 
-      let { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', userId)
-        .single()
-      if (error && status !== 406) {
-        throw error
-      }
+      // the Users row is created automatically by the handle_new_user trigger on signup
+      const { data, error } = await supabase
+        .from('users')
+        .select('username')
+        .eq('user_id', userId)
+        .single();
+      if (error) throw error;
 
-      if (data) {
-        setUsername(data.username)
-        setWebsite(data.website)
-        setAvatarUrl(data.avatar_url)
-      }
+      setUsername(data?.username ?? '');
     } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message)
-      }
+      if (error instanceof Error) Alert.alert(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
-  async function updateProfile({
-    username,
-    website,
-    avatar_url,
-  }: {
-    username: string
-    website: string
-    avatar_url: string
-  }) {
+  async function updateProfile() {
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const updates = {
-        id: userId,
-        username,
-        website,
-        avatar_url,
-        updated_at: new Date(),
-      }
-
-      let { error } = await supabase.from('profiles').upsert(updates)
+      // username is UNIQUE, so store null instead of '' when it's blank
+      const { error } = await supabase
+        .from('users')
+        .update({ username: username.trim() || null })
+        .eq('user_id', userId);
 
       if (error) {
-        throw error
+        // 23505 = unique violation
+        if (error.code === '23505') {
+          Alert.alert('That username is already taken.');
+          return;
+        }
+        throw error;
       }
+      Alert.alert('Profile updated');
     } catch (error: any) {
-      Alert.alert(error.message)
+      Alert.alert(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   return (
     <View style={styles.container}>
       <View>
-
-        {/* ... */}
-
         <Text style={styles.label}>Email</Text>
         <TextInput
           value={email ?? ''}
@@ -90,16 +72,9 @@ export default function Account({ userId, email }: { userId: string; email?: str
       <View style={styles.verticallySpaced}>
         <Text style={styles.label}>Username</Text>
         <TextInput
-          value={username || ''}
-          onChangeText={(text) => setUsername(text)}
-          style={styles.input}
-        />
-      </View>
-      <View style={styles.verticallySpaced}>
-        <Text style={styles.label}>Website</Text>
-        <TextInput
-          value={website || ''}
-          onChangeText={(text) => setWebsite(text)}
+          value={username}
+          onChangeText={setUsername}
+          autoCapitalize="none"
           style={styles.input}
         />
       </View>
@@ -107,7 +82,7 @@ export default function Account({ userId, email }: { userId: string; email?: str
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <TouchableOpacity
           style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={() => updateProfile({ username, website, avatar_url: avatarUrl })}
+          onPress={updateProfile}
           disabled={loading}
         >
           <Text style={styles.buttonText}>{loading ? 'Loading ...' : 'Update'}</Text>
@@ -120,5 +95,5 @@ export default function Account({ userId, email }: { userId: string; email?: str
         </TouchableOpacity>
       </View>
     </View>
-  )
+  );
 }
