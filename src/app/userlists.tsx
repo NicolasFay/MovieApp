@@ -2,7 +2,7 @@ import { ListOptions, ListType } from '@/components/list-options';
 import { MovieList } from '@/components/movieList';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
+import { BottomTabInset, Spacing } from '@/style/theme';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

@@ -2,16 +2,16 @@ import { ReactNode, useState } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-  Extrapolation,
-  interpolate,
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
+    Extrapolation,
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+    withTiming,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
-import { Spacing } from '@/constants/theme';
+import { Spacing } from '@/style/theme';
 
 type Direction = 'left' | 'right' | 'up' | 'down';
 

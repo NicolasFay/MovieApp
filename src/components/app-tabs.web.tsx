@@ -1,17 +1,17 @@
 import {
-  TabList,
-  TabListProps,
-  Tabs,
-  TabSlot,
-  TabTrigger,
-  TabTriggerSlotProps,
+    TabList,
+    TabListProps,
+    Tabs,
+    TabSlot,
+    TabTrigger,
+    TabTriggerSlotProps,
 } from 'expo-router/ui';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { MaxContentWidth, Spacing } from '@/style/theme';
 
 export default function AppTabs() {
   return (

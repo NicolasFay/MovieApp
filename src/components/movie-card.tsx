@@ -1,7 +1,7 @@
-import { StyleSheet, Text, View, ImageBackground } from 'react-native';
+import { ImageBackground, StyleSheet, Text, View } from 'react-native';
 
-import { Spacing } from '@/constants/theme';
 import type { Movie } from '@/api/tmdb';
+import { Spacing } from '@/style/theme';
 
 export function MovieCard({ movie }: { movie: Movie }) {
   return (

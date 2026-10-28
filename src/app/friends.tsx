@@ -5,8 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SearchNames } from '@/components/search-names';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, Spacing } from '@/constants/theme';
 import { UserProfile, searchUsers } from '@/db/dbFunctions';
+import { BottomTabInset, Spacing } from '@/style/theme';
 
 export default function FriendsScreen() {
   const [query, setQuery] = useState('');

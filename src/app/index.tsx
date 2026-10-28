@@ -13,9 +13,9 @@ import { type Movie } from '@/api/tmdb';
 import { MovieCard } from '@/components/movie-card';
 import { SwipeDeck } from '@/components/swipe-deck';
 import { ThemedView } from '@/components/themed-view';
-import { Spacing } from '@/constants/theme';
 import { saveSwipe } from '@/db/dbFunctions';
 import { toDbMovie } from '@/db/dbHelpers';
+import { Spacing } from '@/style/theme';
 
 // returns the deck's movies plus anything in the cache's active queue it doesn't have yet
 function withNewMovies(current: Movie[]): Movie[] {
