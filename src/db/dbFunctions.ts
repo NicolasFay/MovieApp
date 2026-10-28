@@ -1,14 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from '@/api/supabase';
+export { supabase };
 
 export async function insertMovies(movies: any[]) {
   // adds an array of movies formatted from the TMDB api
   // to the Supabase Movies table and avoids duplicates
-  const { error } = await supabase.from('Movies')
+  const { error } = await supabase.from('movies')
                                   .upsert(movies, { onConflict: 'movie_id' });
   if (error) {
       console.error('Error inserting movies:', error);
@@ -18,7 +14,7 @@ export async function insertMovies(movies: any[]) {
 
 export async function getMoviesFromSupabase() {
   // fetches all the movies from the Supabase Movies table
-  const { data, error } = await supabase.from('Movies').select('*');
+  const { data, error } = await supabase.from('movies').select('*');
   if (error) {
       console.error('Error fetching movies:', error);
       throw error;
