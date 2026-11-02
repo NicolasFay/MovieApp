@@ -1,12 +1,19 @@
 import { supabase } from '@/api/supabase';
+import { useSession } from '@/components/session-provider';
 import { useAppStyles } from '@/style/theme';
 import { useEffect, useState } from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-export default function Account({ userId, email }: { userId: string; email?: string }) {
+export default function Account() {
+  const { userId } = useSession();
+  const [email, setEmail] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState('');
   const { styles } = useAppStyles();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email));
+  }, []);
 
   useEffect(() => {
     if (userId) getProfile();

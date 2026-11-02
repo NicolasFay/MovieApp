@@ -2,11 +2,10 @@ import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import AppTabs from '@/components/app-tabs';
 import Auth from '@/components/auth';
 import { SessionProvider, useSession } from '@/components/session-provider';
 import { ThemedView } from '@/components/themed-view';
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
 SplashScreen.preventAutoHideAsync();
@@ -30,7 +29,12 @@ function Gate() {
     );
   }
 
-  return <AppTabs />;
+   return (
+    <Stack>
+      <Stack.Screen name="tabs" options={{ headerShown: false }} />
+      <Stack.Screen name="account" options={{ title: 'Account' }} />
+    </Stack>
+  );
 }
 
 export default function TabLayout() {

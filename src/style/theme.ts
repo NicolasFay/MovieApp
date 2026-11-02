@@ -76,7 +76,7 @@ export type AppColors = typeof Colors.light | typeof Colors.dark;
 function createAppStyles(c: AppColors) {
   return StyleSheet.create({
     container: {
-      marginTop: 40,
+      marginTop: 80,
       padding: 12,
     },
     verticallySpaced: {

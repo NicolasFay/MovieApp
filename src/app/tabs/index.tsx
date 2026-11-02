@@ -1,5 +1,6 @@
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet } from 'react-native';
+import { ActivityIndicator, Button, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import {
@@ -32,6 +33,8 @@ export default function HomeScreen() {
   // every movie handed to the deck so far
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const router = useRouter();
 
   useEffect(() => {
     async function loadMovies() {
@@ -96,6 +99,10 @@ export default function HomeScreen() {
   return (
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
+        <Button 
+          title="ACCOUNT" 
+          onPress={() => router.push('/account')}
+        />
         {loading ? (
           <ActivityIndicator style={styles.loader} />
         ) : (
