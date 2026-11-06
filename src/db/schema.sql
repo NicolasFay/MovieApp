@@ -235,3 +235,43 @@ USING (EXISTS (
   JOIN public.members m2 ON m1.group_id = m2.group_id
   WHERE m1.user_id = auth.uid() AND m2.user_id = listed.user_id
 ));
+
+-- returns list of movies where
+-- 1. user belongs to the specific group
+-- 2. at least one member has it on their watch list
+-- 3. no member has marked it as disliked
+CREATE OR REPLACE FUNCTION public.group_watchlist(p_group_id UUID)
+RETURNS SETOF public.movies
+LANGUAGE SQL
+STABLE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+    SELECT movie.*
+    FROM public.movies AS movie
+    WHERE public.is_group_member(p_group_id)
+
+      -- At least one group member wants to watch it.
+      AND EXISTS (
+          SELECT 1
+          FROM public.listed AS list
+          JOIN public.members AS member
+            ON member.user_id = list.user_id
+          WHERE member.group_id = p_group_id
+            AND list.movie_id = movie.movie_id
+            AND list.status = 'watchlist'
+      )
+
+      -- No group member has disliked it.
+      AND NOT EXISTS (
+          SELECT 1
+          FROM public.listed AS list
+          JOIN public.members AS member
+            ON member.user_id = list.user_id
+          WHERE member.group_id = p_group_id
+            AND list.movie_id = movie.movie_id
+            AND list.status = 'disliked'
+      )
+
+    ORDER BY movie.title, movie.movie_id;
+$$;
