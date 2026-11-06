@@ -8,6 +8,12 @@ import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
+const listChoices: { value: ListType; label: string }[] = [
+  { value: 'liked', label: 'Liked' },
+  { value: 'watchlist', label: 'Watchlist' },
+  { value: 'disliked', label: 'Disliked' },
+];
+
 export default function UserListsScreen() {
   const [selected, setSelected] = useState<ListType>('liked');
 
@@ -19,7 +25,7 @@ export default function UserListsScreen() {
         <ListOptions selected={selected} onSelect={setSelected} />
 
         <View style={styles.content}>
-          <MovieList status={selected} />
+        <MovieList status={selected} listChoices={listChoices} />
         </View>
       </SafeAreaView>
     </ThemedView>
