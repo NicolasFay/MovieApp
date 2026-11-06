@@ -30,10 +30,20 @@ function Gate() {
   }
 
    return (
-    <Stack>
-      <Stack.Screen name="tabs" options={{ headerShown: false }} />
-      <Stack.Screen name="account" options={{ title: 'Account' }} />
-    </Stack>
+<Stack>
+  <Stack.Screen
+    name="tabs"
+    options={{ headerShown: false }}
+  />
+  <Stack.Screen
+    name="account"
+    options={{ title: 'Account' }}
+  />
+  <Stack.Screen
+    name="friends-profile"
+    options={{ headerShown: false }}
+  />
+</Stack>
   );
 }
 

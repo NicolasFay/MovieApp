@@ -1,106 +1,210 @@
-import { supabase } from '@/api/supabase';
-import { useSession } from '@/components/session-provider';
-import { useAppStyles } from '@/style/theme';
 import { useEffect, useState } from 'react';
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+import { supabase } from '@/api/supabase';
+import { ProfileAvatar } from '@/components/profile-avatar';
+import { useSession } from '@/components/session-provider';
+import { ThemedText } from '@/components/themed-text';
+import { useAppStyles } from '@/style/theme';
+
+function errorMessage(error: unknown) {
+  return error && typeof error === 'object' && 'message' in error
+    ? String(error.message)
+    : 'Something went wrong. Please try again.';
+}
 
 export default function Account() {
   const { userId } = useSession();
-  const [email, setEmail] = useState<string>();
-  const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState('');
   const { styles } = useAppStyles();
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email));
-  }, []);
+  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (userId) getProfile();
+    let cancelled = false;
+
+    async function getProfile() {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const { data: authData, error: authError } =
+          await supabase.auth.getUser();
+
+        if (authError) throw authError;
+
+        const { data, error } = await supabase
+          .from('users')
+          .select('username')
+          .eq('user_id', userId)
+          .single();
+
+        if (error) throw error;
+
+        if (!cancelled) {
+          setEmail(authData.user?.email ?? '');
+          setUsername(data?.username ?? '');
+        }
+      } catch (error) {
+        if (!cancelled) {
+          Alert.alert('Could not load profile', errorMessage(error));
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void getProfile();
+
+    return () => {
+      cancelled = true;
+    };
   }, [userId]);
 
-  async function getProfile() {
+  async function updateProfile() {
+    if (!userId || loading) return;
+
     try {
       setLoading(true);
 
-      // the Users row is created automatically by the handle_new_user trigger on signup
       const { data, error } = await supabase
         .from('users')
-        .select('username')
+        .update({
+          username: username.trim() || null,
+        })
         .eq('user_id', userId)
+        .select('user_id')
         .single();
-      if (error) throw error;
 
-      setUsername(data?.username ?? '');
+      if (error) {
+        if (error.code === '23505') {
+          Alert.alert('That username is already taken.');
+          return;
+        }
+
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('Your profile could not be updated.');
+      }
+
+      setUsername(username.trim());
+      Alert.alert('Profile updated');
     } catch (error) {
-      if (error instanceof Error) Alert.alert(error.message);
+      Alert.alert('Could not update profile', errorMessage(error));
     } finally {
       setLoading(false);
     }
   }
 
-  async function updateProfile() {
+  async function signOut() {
     try {
-      setLoading(true);
+      const { error } = await supabase.auth.signOut();
 
-      // username is UNIQUE, so store null instead of '' when it's blank
-      const { error } = await supabase
-        .from('users')
-        .update({ username: username.trim() || null })
-        .eq('user_id', userId);
-
-      if (error) {
-        // 23505 = unique violation
-        if (error.code === '23505') {
-          Alert.alert('That username is already taken.');
-          return;
-        }
-        throw error;
-      }
-      Alert.alert('Profile updated');
-    } catch (error: any) {
-      Alert.alert(error.message);
-    } finally {
-      setLoading(false);
+      if (error) throw error;
+    } catch (error) {
+      Alert.alert('Could not sign out', errorMessage(error));
     }
   }
 
   return (
     <View style={styles.container}>
+      <View style={avatarStyles.section}>
+        <ProfileAvatar size={88} />
+
+        <Pressable
+          disabled
+          accessibilityRole="button"
+          accessibilityState={{ disabled: true }}
+          style={avatarStyles.changeButton}
+        >
+          <ThemedText>Change photo</ThemedText>
+        </Pressable>
+
+        <ThemedText>Coming soon</ThemedText>
+      </View>
+
       <View>
         <Text style={styles.label}>Email</Text>
+
         <TextInput
-          value={email ?? ''}
+          value={email}
           editable={false}
           selectTextOnFocus={false}
           style={[styles.input, styles.inputDisabled]}
         />
       </View>
+
       <View style={styles.verticallySpaced}>
         <Text style={styles.label}>Username</Text>
+
         <TextInput
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
+          autoCorrect={false}
+          editable={!loading}
           style={styles.input}
         />
       </View>
 
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
+          accessibilityRole="button"
+          style={[
+            styles.button,
+            loading && styles.buttonDisabled,
+          ]}
           onPress={updateProfile}
           disabled={loading}
         >
-          <Text style={styles.buttonText}>{loading ? 'Loading ...' : 'Update'}</Text>
+          <Text style={styles.buttonText}>
+            {loading ? 'Loading ...' : 'Update'}
+          </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.verticallySpaced}>
-        <TouchableOpacity style={styles.button} onPress={() => supabase.auth.signOut()}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={styles.button}
+          onPress={signOut}
+        >
           <Text style={styles.buttonText}>Sign Out</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
+
+const avatarStyles = StyleSheet.create({
+  section: {
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 24,
+  },
+  changeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#808080',
+    borderRadius: 10,
+    opacity: 0.5,
+  },
+});
