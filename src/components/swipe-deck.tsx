@@ -2,12 +2,13 @@ import { ReactNode, useState } from 'react';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
-    Extrapolation,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withSpring,
-    withTiming,
+  Extrapolation,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
@@ -99,6 +100,56 @@ export function SwipeDeck<T extends { id: string }>({
   );
 }
 
+// color + label for each swipe direction (matches the handlers in index.tsx)
+const SWIPE_HINTS: Record<Direction, { label: string; color: string }> = {
+  left: { label: 'DISLIKE', color: '#EF4444' }, // red
+  right: { label: 'LIKE', color: '#22C55E' }, // green
+  up: { label: 'SKIP', color: '#9CA3AF' }, // gray
+  down: { label: 'WATCHLIST', color: '#3B82F6' }, // blue
+};
+
+// tinted layer + label that fades in as the card is dragged toward `direction`
+function SwipeOverlay({
+  direction,
+  translateX,
+  translateY,
+  thresholdX,
+  thresholdY,
+}: {
+  direction: Direction;
+  translateX: SharedValue<number>;
+  translateY: SharedValue<number>;
+  thresholdX: number;
+  thresholdY: number;
+}) {
+  const { label, color } = SWIPE_HINTS[direction];
+
+  const animatedStyle = useAnimatedStyle(() => {
+    const x = translateX.value;
+    const y = translateY.value;
+    const horizontal = Math.abs(x) > Math.abs(y); // only the dominant axis shows
+
+    let progress = 0; // 0 = hidden, 1 = reached the swipe threshold
+    if (horizontal && direction === 'left') progress = -x / thresholdX;
+    else if (horizontal && direction === 'right') progress = x / thresholdX;
+    else if (!horizontal && direction === 'up') progress = -y / thresholdY;
+    else if (!horizontal && direction === 'down') progress = y / thresholdY;
+
+    return { opacity: Math.min(Math.max(progress, 0), 1) };
+  });
+
+  return (
+    <Animated.View
+      pointerEvents="none" // never block the drag gesture
+      style={[styles.overlay, { backgroundColor: color + '66' }, animatedStyle]}
+    >
+      <View style={[styles.badge, { borderColor: color }]}>
+        <Text style={[styles.badgeText, { color }]}>{label}</Text>
+      </View>
+    </Animated.View>
+  );
+}
+
 function SwipeableCard({
   children,
   onSwiped,
@@ -172,12 +223,22 @@ function SwipeableCard({
   }));
 
   return (
-    <GestureDetector gesture={pan}>
-      <Animated.View style={[styles.card, cardStyle]}>
-        {children}
-      </Animated.View>
-    </GestureDetector>
-  );
+  <GestureDetector gesture={pan}>
+    <Animated.View style={[styles.card, cardStyle]}>
+      {children}
+      {(['left', 'right', 'up', 'down'] as Direction[]).map((dir) => (
+        <SwipeOverlay
+          key={dir}
+          direction={dir}
+          translateX={translateX}
+          translateY={translateY}
+          thresholdX={thresholdX}
+          thresholdY={thresholdY}
+        />
+      ))}
+    </Animated.View>
+  </GestureDetector>
+);
 }
 
 const styles = StyleSheet.create({
@@ -188,15 +249,24 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.95 }],
     opacity: 0.8,
   },
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    borderRadius: Spacing.four, // matches MovieCard's corners
+    alignItems: 'center',
+    paddingTop: Spacing.five,
+  },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   emptyText: { fontSize: 18, color: '#888' },
   badge: {
-    position: 'absolute',
-    top: Spacing.five,
-    borderWidth: 3,
+    borderWidth: 0,
     borderRadius: Spacing.two,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.one,
     backgroundColor: 'rgba(255,255,255,0.85)',
-  }
+  },
+  badgeText: {
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
 });
