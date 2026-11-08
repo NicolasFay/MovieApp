@@ -34,6 +34,7 @@ function errorMessage(error: unknown) {
     : 'Something went wrong. Try again.';
 }
 
+// displays lists of friends, friend requests, and username searches
 export default function FriendsScreen() {
   const [snapshot, setSnapshot] = useState<FriendsData | null>(null);
   const [query, setQuery] = useState('');
@@ -51,6 +52,7 @@ export default function FriendsScreen() {
   const refreshVersion = useRef(0);
   const searchVersion = useRef(0);
 
+  //reload relationships and their profiles 
   const refresh = useCallback(async () => {
     const version = ++refreshVersion.current;
 
@@ -83,7 +85,7 @@ export default function FriendsScreen() {
       };
     }, [refresh])
   );
-
+  // debounce searches, ignore results from outdated requests
   useEffect(() => {
     const version = ++searchVersion.current;
 
@@ -124,12 +126,14 @@ export default function FriendsScreen() {
   const relationships = snapshot?.relationships ?? [];
   const userId = snapshot?.userId;
 
+  // gets other users id from a relationship
   function otherId(relationship: FriendsData['relationships'][number]) {
     return relationship.requester_id === userId
       ? relationship.addressee_id
       : relationship.requester_id;
   }
-
+  
+  // filters relationships for selected tab
   const visibleIds = new Set(
     relationships
       .filter((relationship) => {
@@ -159,6 +163,7 @@ export default function FriendsScreen() {
       relationship.addressee_id === userId
   ).length;
 
+  // func prvents overlapping actions and refreshes after each change
   async function act(id: string, operation: () => Promise<void>) {
     if (actionLock.current) return;
 
@@ -176,6 +181,7 @@ export default function FriendsScreen() {
     }
   }
 
+  // creats button for friendship action
   function actionButton(
     label: string,
     id: string,
@@ -197,6 +203,7 @@ export default function FriendsScreen() {
     );
   }
 
+  // renders user and friend actions
   function renderProfile({ item }: { item: FriendProfile }) {
     const matches = relationships.filter(
       (relationship) => otherId(relationship) === item.user_id
@@ -300,7 +307,8 @@ export default function FriendsScreen() {
     </View>
   );
   }
-
+  
+  // clears the search and dismisses keyboard
   function cancelSearch() {
     searchVersion.current++;
     setResults([]);
@@ -309,6 +317,7 @@ export default function FriendsScreen() {
     Keyboard.dismiss();
   }
 
+  // chooses the message thats shown when list is empty
   function emptyMessage() {
     if (searching) {
       if (searchError) return searchError;

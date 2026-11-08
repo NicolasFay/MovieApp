@@ -20,7 +20,7 @@ function errorMessage(error: unknown) {
     ? String(error.message)
     : 'Something went wrong. Please try again.';
 }
-
+// account page with details and allows for changes
 export default function Account() {
   const { userId } = useSession();
   const { styles } = useAppStyles();
@@ -29,6 +29,7 @@ export default function Account() {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(true);
 
+  // loads the users email/profile
   useEffect(() => {
     let cancelled = false;
 
@@ -76,6 +77,7 @@ export default function Account() {
     };
   }, [userId]);
 
+  // save username and handle dupes
   async function updateProfile() {
     if (!userId || loading) return;
 
@@ -113,6 +115,7 @@ export default function Account() {
     }
   }
 
+  // end current session
   async function signOut() {
     try {
       const { error } = await supabase.auth.signOut();

@@ -54,11 +54,12 @@ function errorMessage(error: unknown) {
     : 'Could not load this profile.';
 }
 
+// displays friends profile and movie lists 
 export default function FriendProfileScreen() {
   const params = useLocalSearchParams<{
     userId?: string | string[];
   }>();
-
+  // reads selected user id from route 
   const friendId = Array.isArray(params.userId)
     ? params.userId[0]
     : params.userId;
@@ -70,6 +71,7 @@ export default function FriendProfileScreen() {
   const [error, setError] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
 
+  // verifies friendship and load profile when this screen displays
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
@@ -162,6 +164,7 @@ export default function FriendProfileScreen() {
     }, [friendId, reloadKey])
   );
 
+  // shows movies belonging to each list
   const visibleMovies = movies.filter(
     (item) => item.status === selected && item.movie !== null
   );
