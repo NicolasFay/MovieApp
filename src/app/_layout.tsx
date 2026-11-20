@@ -36,12 +36,12 @@ function Gate() {
     options={{ headerShown: false }}
   />
   <Stack.Screen
-    name="account"
-    options={{ title: 'Account' }}
-  />
-  <Stack.Screen
     name="friends-profile"
     options={{ headerShown: false }}
+  />
+  <Stack.Screen 
+    name="group-detail" 
+    options={{ headerShown: false }} 
   />
 </Stack>
   );
