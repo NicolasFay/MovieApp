@@ -25,6 +25,7 @@ type ListStatus = 'liked' | 'watchlist' | 'disliked';
 type Profile = {
   user_id: string;
   username: string | null;
+  avatar_url: string | null;
 };
 
 type Movie = {
@@ -113,7 +114,7 @@ export default function FriendProfileScreen() {
           const { data: friend, error: profileError } =
             await supabase
               .from('users')
-              .select('user_id, username')
+              .select('user_id, username, avatar_url')
               .eq('user_id', friendId)
               .single();
 
@@ -189,7 +190,7 @@ export default function FriendProfileScreen() {
         </Pressable>
 
         <View style={styles.profileHeader}>
-          <ProfileAvatar size={88} />
+          <ProfileAvatar uri={profile?.avatar_url} size={88} />
 
           <ThemedText type="title">
             {profile?.username ?? 'Friend Profile'}

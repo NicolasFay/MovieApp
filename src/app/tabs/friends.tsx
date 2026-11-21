@@ -296,7 +296,7 @@ export default function FriendsScreen() {
           })
         }
       >
-        <ProfileAvatar />
+        <ProfileAvatar uri={item.avatar_url} size={48} />
 
         <ThemedText style={styles.name}>
           {item.username ?? 'Unnamed user'}

@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
+import { decode } from 'base64-arraybuffer';
 
 import { supabase } from '@/api/supabase';
 import { ProfileAvatar } from '@/components/profile-avatar';
@@ -29,7 +31,9 @@ export default function Account() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(true);
-
+  // prof pic state vars
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+const [uploading, setUploading] = useState(false);
   // loads the users email/profile
   useEffect(() => {
     let cancelled = false;
@@ -50,7 +54,7 @@ export default function Account() {
 
         const { data, error } = await supabase
           .from('users')
-          .select('username')
+          .select('username, avatar_url')
           .eq('user_id', userId)
           .single();
 
@@ -59,6 +63,7 @@ export default function Account() {
         if (!cancelled) {
           setEmail(authData.user?.email ?? '');
           setUsername(data?.username ?? '');
+          setAvatarUrl(data?.avatar_url ?? null);
         }
       } catch (error) {
         if (!cancelled) {
@@ -77,6 +82,60 @@ export default function Account() {
       cancelled = true;
     };
   }, [userId]);
+  
+  // picks a photo, uploads it, and saves the url
+  async function changePhoto() {
+  if (!userId || loading || uploading) return;
+
+  setUploading(true);
+
+  try {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+      base64: true,
+    });
+
+    if (result.canceled) return;
+
+    const image = result.assets[0];
+
+    if (!image?.base64) {
+      throw new Error('Could not read this photo.');
+    }
+
+    const path = `${userId}/${Date.now()}.jpg`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, decode(image.base64), {
+        contentType: 'image/jpeg',
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data: urlData } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(path);
+
+    const { error: profileError } = await supabase
+      .from('users')
+      .update({ avatar_url: urlData.publicUrl })
+      .eq('user_id', userId)
+      .select('user_id')
+      .single();
+
+    if (profileError) throw profileError;
+
+    setAvatarUrl(urlData.publicUrl);
+  } catch (error) {
+    Alert.alert('Could not change photo', errorMessage(error));
+  } finally {
+    setUploading(false);
+  }
+}
 
   // save username and handle dupes
   async function updateProfile() {
@@ -84,22 +143,18 @@ export default function Account() {
 
     try {
       setLoading(true);
-
       const { data, error } = await supabase
         .from('users')
         .update({
           username: username.trim() || null,
         })
-        .eq('user_id', userId)
-        .select('user_id')
-        .single();
+        .eq('user_id', userId).select('user_id').single();
 
       if (error) {
         if (error.code === '23505') {
           Alert.alert('That username is already taken.');
           return;
         }
-
         throw error;
       }
 
@@ -128,21 +183,25 @@ export default function Account() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={avatarStyles.section}>
-        <ProfileAvatar size={88} />
+    <ScrollView
+      style={styles.container}
+      keyboardShouldPersistTaps="handled">
 
-        <Pressable
-          disabled
-          accessibilityRole="button"
-          accessibilityState={{ disabled: true }}
-          style={avatarStyles.changeButton}
+    <View style={avatarStyles.section}>
+      <ProfileAvatar uri={avatarUrl} size={88} />
+
+      <Pressable
+        onPress={changePhoto}
+        disabled={loading || uploading}
+        accessibilityRole="button"
+        accessibilityState={{disabled: loading || uploading}}
+        style={[avatarStyles.changeButton, {opacity: loading || uploading ? 0.5 : 1},]}
         >
-          <ThemedText>Change photo</ThemedText>
+          <ThemedText>
+            {uploading ? 'Uploading...' : "Change photo"}
+          </ThemedText>
         </Pressable>
-
-        <ThemedText>Coming soon</ThemedText>
-      </View>
+    </View>
 
       <View>
         <Text style={styles.label}>Email</Text>
@@ -189,6 +248,7 @@ export default function Account() {
           accessibilityRole="button"
           style={styles.button}
           onPress={signOut}
+          disabled={loading || uploading}
         >
           <Text style={styles.buttonText}>Sign Out</Text>
         </TouchableOpacity>
