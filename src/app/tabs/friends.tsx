@@ -416,7 +416,6 @@ export default function FriendsScreen() {
             )
           }
         />
-        <ThemedText type="title">Groups</ThemedText>
       </SafeAreaView>
     </ThemedView>
   );
