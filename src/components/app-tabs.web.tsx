@@ -1,10 +1,10 @@
 import {
-    TabList,
-    TabListProps,
-    Tabs,
-    TabSlot,
-    TabTrigger,
-    TabTriggerSlotProps,
+  TabList,
+  TabListProps,
+  Tabs,
+  TabSlot,
+  TabTrigger,
+  TabTriggerSlotProps,
 } from 'expo-router/ui';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -27,6 +27,12 @@ export default function AppTabs() {
           </TabTrigger>
           <TabTrigger name="friends" href="/friends" asChild>
             <TabButton>Friends</TabButton>
+          </TabTrigger>
+          <TabTrigger name="groups" href="/groups">
+            <TabButton>Groups</TabButton>
+          </TabTrigger>
+          <TabTrigger name="account" href="/account">
+            <TabButton>Account</TabButton>
           </TabTrigger>
         </CustomTabList>
       </TabList>

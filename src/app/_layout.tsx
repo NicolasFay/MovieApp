@@ -12,7 +12,7 @@ SplashScreen.preventAutoHideAsync();
 
 // shows the login screen when signed out, and the main tabs when signed in
 function Gate() {
-  const { userId, loading } = useSession();
+  const { userId, loading, recovering } = useSession();
 
   // keep the splash screen up until we know who (if anyone) is signed in
   useEffect(() => {
@@ -21,7 +21,7 @@ function Gate() {
 
   if (loading) return null;
 
-  if (!userId) {
+  if (!userId || recovering) {
     return (
       <ThemedView style={{ flex: 1 }}>
         <Auth />
@@ -36,12 +36,12 @@ function Gate() {
     options={{ headerShown: false }}
   />
   <Stack.Screen
-    name="account"
-    options={{ title: 'Account' }}
-  />
-  <Stack.Screen
     name="friends-profile"
     options={{ headerShown: false }}
+  />
+  <Stack.Screen 
+    name="group-detail" 
+    options={{ headerShown: false }} 
   />
 </Stack>
   );

@@ -275,3 +275,69 @@ AS $$
 
     ORDER BY movie.title, movie.movie_id;
 $$;
+
+
+-- 1) when a group is created, make its owner a member automatically.
+--    group_watchlist_ranked (below) only works for members, so without this
+--    the owner would not see their own group's list.
+CREATE OR REPLACE FUNCTION public.add_owner_as_member()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY definer
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO public.members(user_id, group_id)
+  VALUES (new.owner_id, new.group_id)
+  ON CONFLICT DO NOTHING;
+  RETURN new;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_group_created ON public.groups;
+CREATE TRIGGER on_group_created
+  AFTER INSERT ON public.groups
+  FOR EACH ROW EXECUTE FUNCTION public.add_owner_as_member();
+
+-- one-time fix for any groups created before this trigger existed
+INSERT INTO public.members(user_id, group_id)
+SELECT owner_id, group_id FROM public.groups
+ON CONFLICT DO NOTHING;
+
+-- 2) combined watchlist for a group, most-wanted first.
+--    - a movie appears if at least one member has it on their watchlist
+--    - a movie is left out if ANY member has it on their hate list ('disliked')
+--    - want_count = how many members have it on their watchlist
+--    - ties are sorted by title
+--    SECURITY INVOKER: the existing "group members can read each other's lists"
+--    policy on public.listed decides which rows the caller can see.
+CREATE OR REPLACE FUNCTION public.group_watchlist_ranked(p_group_id UUID)
+RETURNS TABLE (
+  movie_id BIGINT,
+  title TEXT,
+  movie_desc TEXT,
+  release_date DATE,
+  rating NUMERIC,
+  genre INT[],
+  poster_path TEXT,
+  want_count INT
+)
+LANGUAGE SQL
+STABLE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT m.movie_id, m.title, m.movie_desc, m.release_date, m.rating,
+         m.genre, m.poster_path,
+         (COUNT(*) FILTER (WHERE l.status = 'watchlist'))::INT
+  FROM public.listed AS l
+  JOIN public.members AS mem ON mem.user_id = l.user_id
+  JOIN public.movies AS m ON m.movie_id = l.movie_id
+  WHERE mem.group_id = p_group_id
+    AND public.is_group_member(p_group_id)
+  GROUP BY m.movie_id
+  HAVING COUNT(*) FILTER (WHERE l.status = 'watchlist') > 0
+     AND COUNT(*) FILTER (WHERE l.status = 'disliked') = 0
+  ORDER BY COUNT(*) FILTER (WHERE l.status = 'watchlist') DESC,
+           m.title, m.movie_id;
+$$;

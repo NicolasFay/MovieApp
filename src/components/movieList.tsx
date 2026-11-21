@@ -10,6 +10,8 @@ import {
   View,
 } from 'react-native';
 
+import { getGenreList } from '@/api/cache';
+import { formatGenres } from '@/api/tmdb';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import {
@@ -39,6 +41,7 @@ export function MovieList({ status, listChoices }: Props) {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [choosingList, setChoosingList] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [genres, setGenres] = useState<any[]>([]); // TMDB genre id/name pairs, used to turn the stored genre ids into words
 
   // Incrementing this reloads the currently selected list after a change.
   const [refreshKey, setRefreshKey] = useState(0);
@@ -49,10 +52,16 @@ export function MovieList({ status, listChoices }: Props) {
   const mountedRef = useRef(false);
 
   useEffect(() => {
-    mountedRef.current = true;
-    
+    let cancelled = false;
+
+    getGenreList()
+      .then(list => {
+        if (!cancelled) setGenres(list);
+      })
+      .catch(error => console.error('Could not load genres:', error));
+
     return () => {
-      mountedRef.current = false;
+      cancelled = true;
     };
   }, []);
 
@@ -188,7 +197,7 @@ export function MovieList({ status, listChoices }: Props) {
 
       <FlatList
         data={movies}
-        extraData={saving}
+        extraData={[saving, genres]}
         keyExtractor={movie => String(movie.movie_id)}
         ListEmptyComponent={
           <ThemedText>
@@ -211,8 +220,8 @@ export function MovieList({ status, listChoices }: Props) {
               {item.rating != null && (
                 <ThemedText>{item.rating}</ThemedText>
               )}
-              {item.genre != null && (
-                <ThemedText>{item.genre}</ThemedText>
+              {genres.length > 0 && item.genre?.length > 0 && (
+                <ThemedText>{formatGenres(item.genre, genres).join(', ')}</ThemedText>
               )}
             </View>
 

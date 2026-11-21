@@ -10,6 +10,7 @@ let isFetching = false;
 let populating: Promise<void> | null = null; // Promise that resolves when the cache is populated
 // ^ stops multiple calls to populateCache from making multiple requests to tmdb
 let genres: any[] = [];
+let genrePromise: Promise<any[]> | null = null; // one shared genre request
 
 export function populateCache(): Promise<void> {
     // initializes the active and backup queues with movies.
@@ -24,7 +25,7 @@ export function populateCache(): Promise<void> {
 }
 
 async function loadFirstPage() {
-    genres = await getGenres(); // grab our genre list from tmdb to use for formatting the movies later
+    genres = await getGenreList(); // grab our genre list from tmdb to use for formatting the movies later
     const movies = await getMovies(currentPage);
     const formattedMovies = formatMovies(movies, genres);
 
@@ -73,4 +74,15 @@ export async function refillBackupQueue() {
 export function getActiveQueue(): Movie[] {
     // return a copy of the active queue
     return [...activeQueue];
+}
+
+// fetches TMDB's genre list once and reuses it (also used by the lists screen)
+export function getGenreList(): Promise<any[]> {
+    if (!genrePromise) {
+        genrePromise = getGenres().catch((error) => {
+            genrePromise = null; // allow a retry after a failure
+            throw error;
+        });
+    }
+    return genrePromise;
 }
